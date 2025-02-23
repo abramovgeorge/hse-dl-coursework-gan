@@ -5,14 +5,13 @@ import torch
 from hydra.utils import instantiate
 
 from src.datasets.data_utils import get_dataloaders
-from src.trainer import Inferencer
 from src.utils.init_utils import set_random_seed
 from src.utils.io_utils import ROOT_PATH
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-@hydra.main(version_base=None, config_path="src/configs", config_name="inference")
+@hydra.main(version_base=None, config_path="src/configs", config_name="gan_inference")
 def main(config):
     """
     Main script for inference. Instantiates the model, metrics, and
@@ -44,7 +43,9 @@ def main(config):
     save_path = ROOT_PATH / "data" / "saved" / config.inferencer.save_path
     save_path.mkdir(exist_ok=True, parents=True)
 
-    inferencer = Inferencer(
+    # workaround for instantiate function having config as a parameter
+    inferencer_class = instantiate(config.inferencer_class, _partial_=True)
+    inferencer = inferencer_class(
         model=model,
         config=config,
         device=device,
@@ -60,7 +61,7 @@ def main(config):
     for part in logs.keys():
         for key, value in logs[part].items():
             full_key = part + "_" + key
-            print(f"    {full_key:15s}: {value}")
+            print(f"    {full_key: 15s}: {value}")
 
 
 if __name__ == "__main__":

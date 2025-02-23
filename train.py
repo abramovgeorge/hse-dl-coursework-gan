@@ -6,13 +6,12 @@ from hydra.utils import instantiate
 from omegaconf import OmegaConf
 
 from src.datasets.data_utils import get_dataloaders
-from src.trainer import Trainer
 from src.utils.init_utils import set_random_seed, setup_saving_and_logging
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-@hydra.main(version_base=None, config_path="src/configs", config_name="baseline")
+@hydra.main(version_base=None, config_path="src/configs", config_name="gan")
 def main(config):
     """
     Main script for training. Instantiates the model, optimizer, scheduler,
@@ -45,21 +44,30 @@ def main(config):
     loss_function = instantiate(config.loss_function).to(device)
     metrics = instantiate(config.metrics)
 
-    # build optimizer, learning rate scheduler
-    trainable_params = filter(lambda p: p.requires_grad, model.parameters())
-    optimizer = instantiate(config.optimizer, params=trainable_params)
-    lr_scheduler = instantiate(config.lr_scheduler, optimizer=optimizer)
+    # build optimizers, learning rate schedulers
+    optimizers = dict()
+    lr_schedulers = dict()
+    for name in config.optimizers.keys():
+        trainable_params = filter(
+            lambda p: p.requires_grad, getattr(model, f"{name}_net").parameters()
+        )
+        optimizers[name] = instantiate(config.optimizers[name], params=trainable_params)
+        lr_schedulers[name] = instantiate(
+            config.lr_schedulers[name], optimizer=optimizers[name]
+        )
 
     # epoch_len = number of iterations for iteration-based training
     # epoch_len = None or len(dataloader) for epoch-based training
     epoch_len = config.trainer.get("epoch_len")
 
-    trainer = Trainer(
+    # workaround for instantiate function having config as a parameter
+    trainer_class = instantiate(config.trainer_class, _partial_=True)
+    trainer = trainer_class(
         model=model,
         criterion=loss_function,
         metrics=metrics,
-        optimizer=optimizer,
-        lr_scheduler=lr_scheduler,
+        optimizers=optimizers,
+        lr_schedulers=lr_schedulers,
         config=config,
         device=device,
         dataloaders=dataloaders,

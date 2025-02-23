@@ -20,8 +20,8 @@ class BaseTrainer:
         model,
         criterion,
         metrics,
-        optimizer,
-        lr_scheduler,
+        optimizers,
+        lr_schedulers,
         config,
         device,
         dataloaders,
@@ -38,9 +38,9 @@ class BaseTrainer:
             metrics (dict): dict with the definition of metrics for training
                 (metrics[train]) and inference (metrics[inference]). Each
                 metric is an instance of src.metrics.BaseMetric.
-            optimizer (Optimizer): optimizer for the model.
-            lr_scheduler (LRScheduler): learning rate scheduler for the
-                optimizer.
+            optimizers (dict[Optimizer]): optimizers for the model.
+            lr_schedulers (dict[LRScheduler]): learning rate schedulers for the
+                optimizers.
             config (DictConfig): experiment config containing training config.
             device (str): device for tensors and model.
             dataloaders (dict[DataLoader]): dataloaders for different
@@ -68,8 +68,8 @@ class BaseTrainer:
 
         self.model = model
         self.criterion = criterion
-        self.optimizer = optimizer
-        self.lr_scheduler = lr_scheduler
+        self.optimizers = optimizers
+        self.lr_schedulers = lr_schedulers
         self.batch_transforms = batch_transforms
 
         # define dataloaders
@@ -172,7 +172,7 @@ class BaseTrainer:
 
             # print logged information to the screen
             for key, value in logs.items():
-                self.logger.info(f"    {key:15s}: {value}")
+                self.logger.info(f"    {key: 15s}: {value}")
 
             # evaluate model performance according to configured metric,
             # save best checkpoint as model_best
@@ -228,8 +228,10 @@ class BaseTrainer:
                         epoch, self._progress(batch_idx), batch["loss"].item()
                     )
                 )
+                # learning rate of first lr_scheduler
                 self.writer.add_scalar(
-                    "learning rate", self.lr_scheduler.get_last_lr()[0]
+                    "learning rate",
+                    next(iter(self.lr_schedulers.values())).get_last_lr()[0],
                 )
                 self._log_scalars(self.train_metrics)
                 self._log_batch(batch_idx, batch)
@@ -467,8 +469,14 @@ class BaseTrainer:
             "arch": arch,
             "epoch": epoch,
             "state_dict": self.model.state_dict(),
-            "optimizer": self.optimizer.state_dict(),
-            "lr_scheduler": self.lr_scheduler.state_dict(),
+            "optimizers": {
+                name: optimizer.state_dict()
+                for name, optimizer in self.optimizers.items()
+            },
+            "lr_schedulers": {
+                name: lr_schedule.state_dict()
+                for name, lr_schedule in self.lr_schedulers.items()
+            },
             "monitor_best": self.mnt_best,
             "config": self.config,
         }
@@ -513,8 +521,8 @@ class BaseTrainer:
 
         # load optimizer state from checkpoint only when optimizer type is not changed.
         if (
-            checkpoint["config"]["optimizer"] != self.config["optimizer"]
-            or checkpoint["config"]["lr_scheduler"] != self.config["lr_scheduler"]
+            checkpoint["config"]["optimizers"] != self.config["optimizers"]
+            or checkpoint["config"]["lr_schedulers"] != self.config["lr_schedulers"]
         ):
             self.logger.warning(
                 "Warning: Optimizer or lr_scheduler given in the config file is different "
@@ -522,8 +530,11 @@ class BaseTrainer:
                 "are not resumed."
             )
         else:
-            self.optimizer.load_state_dict(checkpoint["optimizer"])
-            self.lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
+            for name in self.optimizers.keys():
+                self.optimizers[name].load_state_dict(checkpoint["optimizers"][name])
+                self.lr_schedulers[name].load_state_dict(
+                    checkpoint["lr_schedulers"][name]
+                )
 
         self.logger.info(
             f"Checkpoint loaded. Resume training from epoch {self.start_epoch}"

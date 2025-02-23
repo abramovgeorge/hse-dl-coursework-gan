@@ -1,0 +1,40 @@
+defaults:
+  - model: gan
+  - writer: gan_wandb
+  - metrics: gan
+  - datasets: mnist
+  - dataloader: default
+  - transforms: gan
+  - _self_
+optimizers:
+  discriminator:
+    _target_: torch.optim.Adam
+    lr: 2e-4
+  generator:
+    _target_: torch.optim.Adam
+    lr: 2e-4
+lr_schedulers:
+  discriminator:
+    _target_: torch.optim.lr_scheduler.ConstantLR #dummy lr_scheduler
+    factor: 1
+  generator:
+    _target_: torch.optim.lr_scheduler.ConstantLR
+    factor: 1
+loss_function:
+  _target_: src.loss.GANLoss
+trainer_class:
+  _target_: src.trainer.GANTrainer
+trainer:
+  log_step: 50
+  n_epochs: 200
+  epoch_len: null
+  n_d_steps: 1
+  device_tensors: ["img", "labels"] # which tensors should be on device (ex. GPU)
+  resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
+  device: auto # device name or "auto"
+  override: True # if True, will override the previous run with the same name
+  monitor: "off" # "off" or "max/min metric_name", i.e. our goal is to maximize/minimize metric
+  save_period: 5 # checkpoint each save_period epochs in addition to the best epoch
+  early_stop: ${trainer.n_epochs} # epochs for early stopping
+  save_dir: "saved"
+  seed: 1

@@ -1,0 +1,6 @@
+_target_: src.model.GAN
+image_height: 28
+image_width: 28
+fc_hidden: 512
+n_class: 10
+noise_dim: 128
