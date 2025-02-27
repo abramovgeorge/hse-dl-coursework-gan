@@ -1,6 +1,6 @@
 defaults:
   - model: gan
-  - writer: gan_wandb
+  - writer: wandb
   - metrics: gan
   - datasets: mnist
   - dataloader: default

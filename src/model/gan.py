@@ -57,7 +57,6 @@ class GAN(nn.Module):
         Args:
             data (Tensor): input vector.
             cond (Tensor): conditional vector (i.e. one-hot encoding of class)
-            is_fake (bool): boolean indicating whether the input is fake or real
         Returns:
             output (dict): output dict containing logits.
         """
