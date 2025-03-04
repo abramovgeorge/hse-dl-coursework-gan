@@ -1,3 +1,4 @@
+import pandas as pd
 import torch
 import torch.nn.functional as F
 from torchvision.utils import save_image
@@ -89,20 +90,18 @@ class GANInferencer(BaseTrainer):
             stub (dict): empty dict for inference.py consistency
         """
         size = self.cfg_trainer.get("number_of_samples", 1)
-        s_type = self.cfg_trainer.type
+        s_type = self.cfg_trainer.get("type", "mixed")
+        type_vec = torch.randint(self.model.n_class, (size,)).to(self.device)
+        if s_type != "mixed":
+            type_vec = torch.full((size,), s_type).to(self.device)
         noise = torch.randn(size, self.model.noise_dim).to(self.device)
-        cond = F.one_hot(
-            torch.full((size,), self.cfg_trainer.type).to(self.device),
-            num_classes=self.model.n_class,
-        )
+        cond = F.one_hot(type_vec, num_classes=self.model.n_class)
         batch = {"noise": noise, "cond": cond}
-        fake_imgs = self.model.generator(**batch)["fake_img"]
-        fake_img_list = []
-        for fake_img in fake_imgs:
-            fake_img_list.append(fake_img)
+        fake_data = self.model.generator(**batch)["fake_data"]
 
-        if self.save_path is not None:
-            (self.save_path / str(s_type)).mkdir(exist_ok=True, parents=True)
-            save_image(fake_img_list, self.save_path / str(s_type) / "output.jpg")
+        fake_data = self.batch_transforms["inference"]["data_object"].inverse(fake_data)
+
+        output = pd.DataFrame(fake_data.cpu().detach().numpy())
+        output.to_csv(self.save_path / f"{str(s_type)}.csv", index=False)
 
         return dict()

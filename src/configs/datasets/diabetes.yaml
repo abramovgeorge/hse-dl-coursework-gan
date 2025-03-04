@@ -1,0 +1,4 @@
+train:
+  _target_: src.datasets.TableDataset
+  path: data/csvs/diabetes.csv
+  instance_transforms: ${transforms.instance_transforms.train}

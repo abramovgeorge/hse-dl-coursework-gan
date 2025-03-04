@@ -1,17 +1,17 @@
 defaults:
   - model: gan
   - metrics: gan
-  - datasets: mnist # placeholder
+  - datasets: diabetes # placeholder
   - dataloader: default # placeholder
   - transforms: gan # placeholder
   - _self_
 inferencer_class:
   _target_: src.trainer.GANInferencer
 inferencer:
-  device_tensors: ["img", "labels"] # which tensors should be on device (ex. GPU)
+  device_tensors: ["data_object", "labels"] # which tensors should be on device (ex. GPU)
   device: auto # device name or "auto"
-  save_path: "gan_mnist" # any name here, can be a dataset name
+  save_path: "vanilla_gan" # any name here, can be a dataset name
   seed: 1
-  from_pretrained: "saved/gan_mnist/checkpoint-epoch200.pth" # path to the pretrained model
-  number_of_samples: 64
-  type: 0
+  from_pretrained: "saved/vanilla_gan/checkpoint-epoch1500.pth" # path to the pretrained model
+  number_of_samples: 768
+  # type: 0

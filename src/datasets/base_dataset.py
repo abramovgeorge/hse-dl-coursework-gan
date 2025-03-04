@@ -63,7 +63,7 @@ class BaseDataset(Dataset):
         img = self.load_img(data_path)
         label = data_dict["label"]
 
-        instance_data = {"img": img, "labels": label}
+        instance_data = {"data_object": img, "labels": label}
         instance_data = self.preprocess_data(instance_data)
 
         return instance_data

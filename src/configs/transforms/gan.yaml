@@ -1,5 +1,5 @@
 defaults:
-  - batch_transforms: mnist
+  - batch_transforms: gan
   - _self_
 
 # this lines are required if you do not use instance transforms

@@ -1,0 +1,13 @@
+train:
+  data_object:
+    _target_: src.transforms.MinMaxScaler
+  labels:
+    _target_: src.transforms.OneHot
+    num_classes: 2
+
+inference:
+  data_object:
+    _target_: src.transforms.MinMaxScaler
+  labels:
+    _target_: src.transforms.OneHot
+    num_classes: 2

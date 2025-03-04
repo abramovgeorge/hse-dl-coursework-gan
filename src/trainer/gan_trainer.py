@@ -86,12 +86,12 @@ class GANTrainer(BaseTrainer):
         batch["loss"] = torch.abs(batch["discriminator_loss"] - batch["generator_loss"])
         return batch
 
-    def _train_discriminator(self, img, labels, fake_labels, **batch):
+    def _train_discriminator(self, data_object, labels, fake_labels, **batch):
         """
         One iteration of training discriminator
 
         Args:
-            img (Tensor): image tensor in batch
+            data_object (Tensor): data_object tensor in batch
             labels (Tensor): labels of images in batch
             noise (Tensor): random noise tensor in batch
         Returns:
@@ -99,13 +99,13 @@ class GANTrainer(BaseTrainer):
         """
         self.optimizers["discriminator"].zero_grad()
 
-        batch["data"] = img
+        batch["data"] = data_object
         batch["cond"] = labels
         real_logits = self.model.discriminator(**batch)
         batch["real_logits"] = real_logits["logits"]
 
-        fake_img = self.model.generator(**batch)["fake_img"].detach()
-        batch["data"] = fake_img
+        fake_data = self.model.generator(**batch)["fake_data"].detach()
+        batch["data"] = fake_data
         batch["cond"] = fake_labels
         fake_logits = self.model.discriminator(**batch)
         batch["fake_logits"] = fake_logits["logits"]
@@ -131,8 +131,8 @@ class GANTrainer(BaseTrainer):
         self.optimizers["generator"].zero_grad()
 
         batch["cond"] = fake_labels
-        fake_img = self.model.generator(**batch)["fake_img"]
-        batch["data"] = fake_img
+        fake_data = self.model.generator(**batch)["fake_data"]
+        batch["data"] = fake_data
         fake_logits = self.model.discriminator(**batch)
         batch["fake_logits"] = fake_logits["logits"]
 
@@ -145,20 +145,24 @@ class GANTrainer(BaseTrainer):
             self.lr_schedulers["generator"].step()
         return {"generator_loss": batch["generator_loss"]}
 
-    def _generate_noise_and_labels(self, img, **batch):
+    def _generate_noise_and_labels(self, data_object, **batch):
         """
         Generate random noise from normal distribution and add it to batch
 
         Args:
-            img (Tensor): image tensor in batch
+            data_object (Tensor): data_object tensor in batch (needed only for batch size)
         Returns:
             noise (Tensor): random noise tensor in batch
             fake labels (Tensor): random fake labels tensor in batch
         """
         return {
-            "noise": torch.randn(img.shape[0], self.model.noise_dim).to(self.device),
+            "noise": torch.randn(data_object.shape[0], self.model.noise_dim).to(
+                self.device
+            ),
             "fake_labels": F.one_hot(
-                torch.randint(self.model.n_class, (img.shape[0],)).to(self.device),
+                torch.randint(self.model.n_class, (data_object.shape[0],)).to(
+                    self.device
+                ),
                 num_classes=self.model.n_class,
             ),
         }

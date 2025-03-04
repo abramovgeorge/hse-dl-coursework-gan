@@ -1,7 +1,7 @@
 _target_: src.logger.WandBWriter
-project_name: "Vanilla_GAN"
+project_name: "Tabular_GANs"
 entity: null
-run_name: "gan_mnist"
+run_name: "vanilla_gan"
 mode: "online"
 loss_names: ["discriminator_loss", "generator_loss"] # which losses to log (useful for multi-loss tasks, s.a. GANs)
 log_checkpoints: False # set to True if you want to log save_dir with checkpoints to W&B

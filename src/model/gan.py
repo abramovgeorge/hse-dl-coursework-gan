@@ -8,11 +8,10 @@ class GAN(nn.Module):
     Conditional Generative Adversarial Networks model
     """
 
-    def __init__(self, image_width, image_height, n_class, noise_dim, fc_hidden=256):
+    def __init__(self, n_feats, n_class, noise_dim, fc_hidden=256):
         """
         Args:
-            image_width (int): image width.
-            image_height (int): image height
+            n_feats (int): number of features
             n_class (int): number of classes.
             noise_dim (int): dimensionality of noise vector
             fc_hidden (int): number of hidden features.
@@ -22,9 +21,7 @@ class GAN(nn.Module):
         self.noise_dim = noise_dim
         self.n_class = n_class
 
-        self._x = image_width
-        self._y = image_height
-        self._n_feats = self._x * self._y
+        self._n_feats = n_feats
 
         self.discriminator_net = Sequential(
             nn.Linear(in_features=self._n_feats + self.n_class, out_features=fc_hidden),
@@ -60,7 +57,7 @@ class GAN(nn.Module):
         Returns:
             output (dict): output dict containing logits.
         """
-        return {"logits": self.discriminator_net(torch.cat((data.flatten(1), cond), 1))}
+        return {"logits": self.discriminator_net(torch.cat((data, cond), 1))}
 
     def generator(self, noise: torch.Tensor, cond: torch.Tensor, **batch):
         """
@@ -70,13 +67,9 @@ class GAN(nn.Module):
             noise (Tensor): input latent noise.
             cond (Tensor): conditional vector (i.e. one-hot encoding of class)
         Returns:
-            output (Tensor): fake image.
+            output (Tensor): fake data object.
         """
-        return {
-            "fake_img": self.generator_net(torch.cat((noise, cond), 1)).view(
-                -1, 1, self._y, self._x
-            )
-        }
+        return {"fake_data": self.generator_net(torch.cat((noise, cond), 1))}
 
     def __str__(self):
         """
