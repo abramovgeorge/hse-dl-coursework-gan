@@ -92,8 +92,8 @@ class GANTrainer(BaseTrainer):
 
         Args:
             data_object (Tensor): data_object tensor in batch
-            labels (Tensor): labels of images in batch
-            noise (Tensor): random noise tensor in batch
+            labels (Tensor): labels of data in batch
+            fake_labels (Tensor): random fake labels tensor in batch
         Returns:
             discriminator_loss (dict): dict, containing discriminator loss
         """
@@ -124,7 +124,7 @@ class GANTrainer(BaseTrainer):
         One iteration of training generator
 
         Args:
-            noise (Tensor): random noise tensor in batch
+            fake_labels (Tensor): random fake labels tensor in batch
         Returns:
             generator_loss (dict): dict, containing generator loss
         """

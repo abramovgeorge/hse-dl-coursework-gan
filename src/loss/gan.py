@@ -4,7 +4,7 @@ from torch import nn
 
 class GANLoss(nn.Module):
     """
-    Example of a loss function to use.
+    GAN loss functions.
     """
 
     def __init__(self):
