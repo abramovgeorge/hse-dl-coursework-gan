@@ -12,6 +12,6 @@ inferencer:
   device: auto # device name or "auto"
   save_path: "tgan" # any name here, can be a dataset name
   seed: 1
-  from_pretrained: "saved/tgan/checkpoint-epoch700.pth" # path to the pretrained model
+  from_pretrained: "saved/tgan/model_best.pth" # path to the pretrained model
   number_of_samples: 768
   # type: 0

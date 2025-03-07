@@ -41,6 +41,7 @@ class TGAN(nn.Module):
         d_layers = []
         for i in range(len(d_dims) - 1):
             d_layers.append(nn.Conv2d(d_dims[i][0], d_dims[i + 1][0], 4, 2, 1))
+            d_layers.append(nn.BatchNorm2d(d_dims[i + 1][0]))
             d_layers.append(nn.LeakyReLU())
         # add last convolution layer to condense channels to 1 scalar with kernel equal to side
         d_layers.append(nn.Conv2d(d_dims[-1][0], 1, d_dims[-1][1], 1, 0))
@@ -66,6 +67,7 @@ class TGAN(nn.Module):
             )
         ]
         for i in range(len(g_dims) - 1):
+            g_layers.append(nn.BatchNorm2d(g_dims[-(i + 1)][0]))
             g_layers.append(nn.LeakyReLU())
             g_layers.append(
                 nn.ConvTranspose2d(g_dims[-(i + 1)][0], g_dims[-(i + 2)][0], 4, 2, 1)
@@ -89,6 +91,7 @@ class TGAN(nn.Module):
         c_layers = []
         for i in range(len(c_dims) - 1):
             c_layers.append(nn.Conv2d(c_dims[i][0], c_dims[i + 1][0], 4, 2, 1))
+            c_layers.append(nn.BatchNorm2d(c_dims[i + 1][0]))
             c_layers.append(nn.LeakyReLU())
         # add last convolution layer to condense channels to 1 scalar with kernel equal to side
         c_layers.append(nn.Conv2d(c_dims[-1][0], 1, c_dims[-1][1], 1, 0))
