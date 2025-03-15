@@ -8,20 +8,26 @@ class MinMaxScaler(nn.Module):
     Transform scaling each column to [0, 1]
     """
 
-    def __init__(self, data, device):
+    def __init__(self, data, device, config):
         """
         Args:
-            data (pd.DataFrame): number of classes in data.
+            data (TableDataset): table dataset.
+            device (str): device of dataset
+            config (DictConfig): hydra experiment config.
         """
         super().__init__()
 
         self._min = (
-            torch.tensor([data.iloc[:, i].min() for i in range(data.shape[1])])
+            torch.tensor(
+                [data.table.iloc[:, i].min() for i in range(data.table.shape[1])]
+            )
             .to(device)
             .float()
         )
         self._max = (
-            torch.tensor([data.iloc[:, i].max() for i in range(data.shape[1])])
+            torch.tensor(
+                [data.table.iloc[:, i].max() for i in range(data.table.shape[1])]
+            )
             .to(device)
             .float()
         )

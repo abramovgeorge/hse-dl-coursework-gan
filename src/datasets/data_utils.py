@@ -71,15 +71,13 @@ def get_dataloaders(config, device):
         dataset = datasets[dataset_partition]
 
         batch_transforms[dataset_partition] = dict()
-        batch_transforms[dataset_partition].update(
-            {
-                "data_object": instantiate(
-                    cfg_bt[dataset_partition]["data_object"],
-                    data=dataset.table,
-                    device=device,
-                )
-            }
+        tmp = instantiate(
+            cfg_bt[dataset_partition]["data_object"],
+            data=dataset,
+            device=device,
+            _partial_=True,
         )
+        batch_transforms[dataset_partition].update({"data_object": tmp(config=config)})
         batch_transforms[dataset_partition].update(
             {"labels": instantiate(cfg_bt[dataset_partition]["labels"])}
         )

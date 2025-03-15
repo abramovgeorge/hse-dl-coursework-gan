@@ -8,10 +8,18 @@ class TableDataset(Dataset):
     Class for the table datasets
     """
 
-    def __init__(self, path, limit=None, shuffle=False, instance_transforms=None):
+    def __init__(
+        self,
+        path,
+        discrete_columns,
+        limit=None,
+        shuffle=False,
+        instance_transforms=None,
+    ):
         """
         Args:
             path (str): path to csv containing table dataset
+            discrete_columns (list[str]): the names of discrete columns in the dataset
             limit (int | None): if not None, limit the total number of elements
                 in the dataset to 'limit' elements.
             shuffle (bool): if True, shuffle the table. Uses numpy random package.
@@ -23,6 +31,7 @@ class TableDataset(Dataset):
         table = self._shuffle_and_limit_table(table, limit, shuffle)
         self.table = table
         self.instance_transforms = instance_transforms
+        self.discrete_columns = discrete_columns
 
     def __len__(self):
         """
