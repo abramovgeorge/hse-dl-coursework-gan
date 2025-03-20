@@ -1,0 +1,18 @@
+defaults:
+  - model: ctabgan
+  - metrics: gan
+  - datasets: diabetes
+  - dataloader: ctgan
+  - transforms: ctgan
+  - _self_
+inferencer_class:
+  _target_: src.trainer.CTGANInferencer
+inferencer:
+  device_tensors: ["data_object", "labels", "cond", "mask"] # which tensors should be on device (ex. GPU)
+  device: auto # device name or "auto"
+  save_path: "ctabgan" # any name here, can be a dataset name
+  seed: 1
+  from_pretrained: "saved/ctabgan/model_best.pth" # path to the pretrained model
+  number_of_samples: 768
+  target_class: "Outcome"
+  # type: 1

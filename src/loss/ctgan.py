@@ -20,7 +20,7 @@ class CTGANLoss(GANLoss):
         self._transforms_info = transforms_info
         self._discrete_columns = discrete_columns
 
-    def conditional(self, cond, mask, fake_data_logits, fake_data, **batch):
+    def conditional(self, cond, mask, fake_data_logits, **batch):
         """
         Conditional loss function calculation logic.
         Args:

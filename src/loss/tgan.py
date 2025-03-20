@@ -11,7 +11,6 @@ class TGANLoss(GANLoss):
 
     def __init__(self):
         super().__init__()
-        self.classifier_criterion = nn.L1Loss()
 
     def classifier(self, c_logits: torch.Tensor, labels: torch.Tensor, **batch):
         """
@@ -41,8 +40,8 @@ class TGANLoss(GANLoss):
         """
         return {
             "classification_loss": self.criterion(
-                torch.clip(generated_labels.reshape(-1, 1), min=1e-6, max=1 - 1e-6),
-                fake_c_logits,
+                fake_c_logits.reshape(-1),
+                torch.clip(generated_labels.type(torch.float), min=0, max=1),
             )
         }
 

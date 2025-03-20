@@ -22,6 +22,8 @@ class MinMaxScaler(nn.Module):
             self._min = nn.Parameter(pickle.load(f))
         with open(path / "max", "rb") as f:
             self._max = nn.Parameter(pickle.load(f))
+        self._min.requires_grad = False
+        self._max.requires_grad = False
 
     def forward(self, x):
         """

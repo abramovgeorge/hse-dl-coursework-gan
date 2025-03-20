@@ -1,0 +1,5 @@
+_target_: src.model.CTABGAN
+n_class: 2
+noise_dim: 128
+n_channels: 8
+pac: 2
