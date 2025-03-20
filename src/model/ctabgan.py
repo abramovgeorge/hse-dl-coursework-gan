@@ -153,8 +153,9 @@ class CTABGAN(nn.Module):
         ).to(net_input.device)
         net_input = torch.cat((net_input, zeros), 1)
         batch_size = net_input.shape[0]
-        # batch size should be divisible by pac parameter
-        assert batch_size % self._pac == 0
+        assert (
+            batch_size % self._pac == 0
+        ), "The batch size should be divisible by pac parameter"
         net_input = net_input.reshape(-1, self._pac, self._d_side, self._d_side)
         intermediate = self.discriminator_net[:-2](net_input)
         logits = self.discriminator_net[-2:](intermediate)
@@ -199,8 +200,9 @@ class CTABGAN(nn.Module):
             net_input.shape[0], self._c_side * self._c_side - net_input.shape[1]
         ).to(net_input.device)
         net_input = torch.cat((net_input, zeros), 1)
-        net_input = net_input.reshape(-1, self._c_side, self._c_side)
-        net_input = net_input.unsqueeze(1)  # add channel dim
+        net_input = net_input.reshape(
+            -1, 1, self._c_side, self._c_side
+        )  # add channel dim
         return {"c_logits": self.classifier_net(net_input).reshape(-1, 1)}
 
     def __str__(self):

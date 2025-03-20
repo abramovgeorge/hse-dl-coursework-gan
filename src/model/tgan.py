@@ -115,8 +115,9 @@ class TGAN(nn.Module):
             net_input.shape[0], self._d_side * self._d_side - net_input.shape[1]
         ).to(net_input.device)
         net_input = torch.cat((net_input, zeros), 1)
-        net_input = net_input.reshape(-1, self._d_side, self._d_side)
-        net_input = net_input.unsqueeze(1)  # add channel dim
+        net_input = net_input.reshape(
+            -1, 1, self._d_side, self._d_side
+        )  # add channel dim
         intermediate = self.discriminator_net[:-2](net_input)
         logits = self.discriminator_net[-2:](intermediate)
         return {
@@ -157,8 +158,9 @@ class TGAN(nn.Module):
             net_input.shape[0], self._c_side * self._c_side - net_input.shape[1]
         ).to(net_input.device)
         net_input = torch.cat((net_input, zeros), 1)
-        net_input = net_input.reshape(-1, self._c_side, self._c_side)
-        net_input = net_input.unsqueeze(1)  # add channel dim
+        net_input = net_input.reshape(
+            -1, 1, self._c_side, self._c_side
+        )  # add channel dim
         return {"c_logits": self.classifier_net(net_input).reshape(-1, 1)}
 
     def __str__(self):

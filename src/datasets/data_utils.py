@@ -3,7 +3,7 @@ from itertools import repeat
 from hydra.utils import instantiate
 
 from src.datasets.collate import collate_fn
-from src.transforms.setup_transforms import SetupTransforms
+from src.transforms.setup_transforms import setup_transforms
 from src.utils.init_utils import set_worker_seed
 
 
@@ -68,7 +68,7 @@ def get_dataloaders(config, device):
         dataset = datasets[dataset_partition]
 
         if dataset_partition == "train":
-            SetupTransforms(dataset=dataset, config=config)
+            setup_transforms(dataset=dataset, config=config)
 
         assert config.dataloader.batch_size <= len(dataset), (
             f"The batch size ({config.dataloader.batch_size}) cannot "

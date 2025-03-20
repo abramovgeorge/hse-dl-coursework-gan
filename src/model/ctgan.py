@@ -107,8 +107,9 @@ class CTGAN(nn.Module):
         """
         net_input = torch.cat((data, cond), 1)
         batch_size = net_input.shape[0]
-        # batch size should be divisible by pac parameter
-        assert batch_size % self._pac == 0
+        assert (
+            batch_size % self._pac == 0
+        ), "The batch size should be divisible by pac parameter"
         net_input = net_input.reshape((batch_size // self._pac, -1))
         return {"logits": self.discriminator_net(net_input)}
 

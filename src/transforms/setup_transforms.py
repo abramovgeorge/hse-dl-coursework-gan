@@ -11,7 +11,7 @@ from src.transforms.ctgan import ContinuousTransform
 from src.utils.io_utils import ROOT_PATH
 
 
-def SetupMinMax(dataset, config):
+def setup_minmax(dataset, config):
     """
     Args:
         dataset (TableDataset): table dataset.
@@ -33,7 +33,7 @@ def SetupMinMax(dataset, config):
         pickle.dump(max_t, f)
 
 
-def SetupCTGAN(dataset, config, max_clusters):
+def setup_ctgan(dataset, config, max_clusters):
     """
     Args:
         dataset (TableDataset): table dataset.
@@ -102,15 +102,15 @@ def SetupCTGAN(dataset, config, max_clusters):
             config.loss_function.discrete_columns = dataset.discrete_columns
 
 
-def SetupTransforms(dataset, config):
+def setup_transforms(dataset, config):
     """
     Args:
     data (TableDataset): table dataset.
     config (DictConfig): hydra experiment config.
     """
     setup_fns = {
-        "minmax": SetupMinMax,
-        "ctgan": SetupCTGAN,
+        "minmax": setup_minmax,
+        "ctgan": setup_ctgan,
     }
     setup_names = config.transforms.setup
     for name, args in setup_names.items():
