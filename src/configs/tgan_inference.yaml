@@ -1,5 +1,5 @@
 defaults:
-  - model: gan
+  - model: tgan
   - metrics: gan
   - datasets: diabetes # placeholder
   - dataloader: default # placeholder
@@ -10,8 +10,8 @@ inferencer_class:
 inferencer:
   device_tensors: ["data_object", "labels"] # which tensors should be on device (ex. GPU)
   device: auto # device name or "auto"
-  save_path: "gan" # any name here, can be a dataset name
+  save_path: "tgan" # any name here, can be a dataset name
   seed: 1
-  from_pretrained: "saved/vanilla_gan/checkpoint-epoch1500.pth" # path to the pretrained model
+  from_pretrained: "saved/tgan/model_best.pth" # path to the pretrained model
   number_of_samples: 768
   # type: 0

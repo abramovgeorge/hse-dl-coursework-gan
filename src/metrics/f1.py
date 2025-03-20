@@ -29,7 +29,4 @@ class F1Metric(BaseMetric):
         Returns:
             metric (float): calculated metric.
         """
-        # print(m_logits)
-        # print(labels)
-        # print(self.metric(m_logits, labels.max(axis=1).indices.reshape(-1, 1)))
         return self.metric(m_logits, labels.max(axis=1).indices.reshape(-1, 1))

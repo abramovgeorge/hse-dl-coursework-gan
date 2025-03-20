@@ -3,6 +3,7 @@ from itertools import repeat
 from hydra.utils import instantiate
 
 from src.datasets.collate import collate_fn
+from src.transforms.setup_transforms import SetupTransforms
 from src.utils.init_utils import set_worker_seed
 
 
@@ -58,10 +59,6 @@ def get_dataloaders(config, device):
             should be applied on the whole batch. Depend on the
             tensor name.
     """
-    # transforms or augmentations init
-    batch_transforms = dict()
-    cfg_bt = config.transforms.batch_transforms
-
     # dataset partitions init
     datasets = instantiate(config.datasets)  # instance transforms are defined inside
 
@@ -70,17 +67,8 @@ def get_dataloaders(config, device):
     for dataset_partition in config.datasets.keys():
         dataset = datasets[dataset_partition]
 
-        batch_transforms[dataset_partition] = dict()
-        tmp = instantiate(
-            cfg_bt[dataset_partition]["data_object"],
-            data=dataset,
-            device=device,
-            _partial_=True,
-        )
-        batch_transforms[dataset_partition].update({"data_object": tmp(config=config)})
-        batch_transforms[dataset_partition].update(
-            {"labels": instantiate(cfg_bt[dataset_partition]["labels"])}
-        )
+        if dataset_partition == "train":
+            SetupTransforms(dataset=dataset, config=config)
 
         assert config.dataloader.batch_size <= len(dataset), (
             f"The batch size ({config.dataloader.batch_size}) cannot "
@@ -97,7 +85,8 @@ def get_dataloaders(config, device):
         )
         dataloaders[dataset_partition] = partition_dataloader
 
-    batch_transforms["inference"] = batch_transforms["train"]
-
+    # transforms or augmentations init
+    batch_transforms = instantiate(config.transforms.batch_transforms)
     move_batch_transforms_to_device(batch_transforms, device)
+
     return dataloaders, batch_transforms

@@ -1,6 +1,10 @@
+import pickle
+
 import torch
 import torch.nn.functional as F
 from torch import nn
+
+from src.utils.io_utils import ROOT_PATH
 
 
 class MinMaxScaler(nn.Module):
@@ -8,29 +12,16 @@ class MinMaxScaler(nn.Module):
     Transform scaling each column to [0, 1]
     """
 
-    def __init__(self, data, device, config):
-        """
-        Args:
-            data (TableDataset): table dataset.
-            device (str): device of dataset
-            config (DictConfig): hydra experiment config.
-        """
+    def __init__(self):
         super().__init__()
 
-        self._min = (
-            torch.tensor(
-                [data.table.iloc[:, i].min() for i in range(data.table.shape[1])]
-            )
-            .to(device)
-            .float()
-        )
-        self._max = (
-            torch.tensor(
-                [data.table.iloc[:, i].max() for i in range(data.table.shape[1])]
-            )
-            .to(device)
-            .float()
-        )
+        path = ROOT_PATH / "transforms_data" / "minmax"
+
+        # nn.Parameter allows for automatic transfer to device when calling .to(device) on the transform object
+        with open(path / "min", "rb") as f:
+            self._min = nn.Parameter(pickle.load(f))
+        with open(path / "max", "rb") as f:
+            self._max = nn.Parameter(pickle.load(f))
 
     def forward(self, x):
         """

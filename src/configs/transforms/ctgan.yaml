@@ -2,6 +2,11 @@ defaults:
   - batch_transforms: ctgan
   - _self_
 
+# batch transform to setup separately in setup_transforms.py file
+setup:
+  ctgan:
+    max_clusters: 10
+
 # this lines are required if you do not use instance transforms
 instance_transforms:
   train: null
