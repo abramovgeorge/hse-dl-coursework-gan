@@ -1,2 +1,2 @@
 _target_: src.datasets.CTGANDataloader
-batch_size: 10
+batch_size: 500

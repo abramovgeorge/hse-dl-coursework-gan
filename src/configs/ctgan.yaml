@@ -2,7 +2,7 @@ defaults:
   - model: ctgan
   - writer: wandb_ctgan
   - metrics: gan
-  - datasets: diabetes
+  - datasets: adult
   - dataloader: ctgan
   - transforms: ctgan
   - _self_
@@ -26,8 +26,8 @@ trainer_class:
   _target_: src.trainer.CTGANTrainer
 trainer:
   log_step: 50
-  n_epochs: 500
-  epoch_len: 70 # CTGAN supports only iteration-based training
+  n_epochs: 300
+  epoch_len: 65 # CTGAN supports only iteration-based training
   n_d_steps: 1
   device_tensors: ["data_object", "labels", "cond", "mask"] # which tensors should be on device (ex. GPU)
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml

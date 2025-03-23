@@ -1,7 +1,7 @@
 defaults:
   - model: ctgan
   - metrics: gan
-  - datasets: diabetes
+  - datasets: adult
   - dataloader: ctgan
   - transforms: ctgan
   - _self_
@@ -13,6 +13,6 @@ inferencer:
   save_path: "ctgan" # any name here, can be a dataset name
   seed: 1
   from_pretrained: "saved/ctgan/checkpoint-epoch500.pth" # path to the pretrained model
-  number_of_samples: 768
-  target_class: "Outcome"
+  number_of_samples: 32561
+  target_class: "income"
   # type: 1

@@ -69,10 +69,8 @@ class CTABGANTrainer(TGANTrainer):
         batch["fake_c_logits"] = fake_c_logits["c_logits"]
 
         fake_features = d_output["features"]
-        batch["real_mean"] = torch.mean(real_features, dim=0)
-        batch["real_sd"] = torch.std(real_features, dim=0)
-        batch["fake_mean"] = torch.mean(fake_features, dim=0)
-        batch["fake_sd"] = torch.std(fake_features, dim=0)
+        batch["real_features"] = real_features
+        batch["fake_features"] = fake_features
 
         loss = self.criterion.generator(**batch)
         batch.update(loss)
@@ -97,4 +95,29 @@ class CTABGANTrainer(TGANTrainer):
             "classification_loss": batch["classification_loss"],
             "information_loss": batch["information_loss"],
             "conditional_loss": batch["conditional_loss"],
+        }
+
+    def _train_classifier(self, data_object, **batch):
+        """
+        One iteration of training classifier
+
+        Args:
+            data_object (Tensor): random noise tensor in batch
+        Returns:
+            output (dict): dict, containing classifier loss and classifier logits for the metrics
+        """
+        self.optimizers["classifier"].zero_grad()
+        data_without_labels = data_object[:, : -self.model.n_class]
+        logits = self.model.classifier(data_without_labels)
+        batch.update(logits)
+        loss = self.criterion.classifier(**batch)
+        batch.update(loss)
+        batch["classifier_loss"].backward()
+        self._clip_grad_norm()
+        self.optimizers["classifier"].step()
+        if self.lr_schedulers["classifier"] is not None:
+            self.lr_schedulers["classifier"].step()
+        return {
+            "classifier_loss": batch["classifier_loss"],
+            "m_logits": batch["c_logits"],
         }

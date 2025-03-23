@@ -45,24 +45,19 @@ class TGANLoss(GANLoss):
             )
         }
 
-    def information(
-        self,
-        real_mean: torch.Tensor,
-        real_sd: torch.Tensor,
-        fake_mean: torch.Tensor,
-        fake_sd: torch.Tensor,
-        **batch
-    ):
+    def information(self, real_features, fake_features, **batch):
         """
         Information loss function calculation logic.
         Args:
-            real_mean (Tensor): mean of features on real data
-            real_sd (Tensor): standard derivation of features on real data
-            fake_mean (Tensor): mean of features on fake data
-            fake_sd (Tensor): standard derivation of features on fake data
+            real_features (Tensor): flattened features of real data from discriminator
+            fake_features (Tensor): flattened features of fake data from discriminator
         Returns:
             information_loss (dict): dict containing calculated information loss function for discriminator.
         """
+        real_mean = torch.mean(real_features, dim=0)
+        real_sd = torch.std(real_features, dim=0)
+        fake_mean = torch.mean(fake_features, dim=0)
+        fake_sd = torch.std(fake_features, dim=0)
         return {
             "information_loss": torch.norm(real_mean - fake_mean, p=2)
             + torch.norm(real_sd - fake_sd, p=2)

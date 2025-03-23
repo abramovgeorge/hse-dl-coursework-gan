@@ -44,13 +44,17 @@ class TableDataset(Dataset):
         Get element from the table, preprocess it, and combine it into a dict.
 
         Args:
-            ind (int): index in the self.table list.
+            ind (int | np.array): index, of array of indices, in the self.table list.
         Returns:
             instance_data (dict): dict, containing instance
                 (a single dataset element).
         """
-        data = torch.tensor(self.table.iloc[ind]).float()
-        label = int(data[-1])  # we assume that the index is the last column
+        data = torch.tensor(self.table.iloc[ind].to_numpy()).float()
+        # we assume that the index is the last column
+        if len(data.shape) == 1:
+            label = int(data[-1])
+        else:
+            label = data[:, -1].type(torch.long)
         instance_data = {"data_object": data, "labels": label}
         instance_data = self.preprocess_data(instance_data)
         return instance_data

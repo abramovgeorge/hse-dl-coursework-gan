@@ -76,10 +76,10 @@ def setup_ctgan(dataset, config, max_clusters):
             idx += transforms_info[f"{column_name}.component"]["rle"][1] + 1
         transforms[column_name] = transform
 
-    tmp = pd.DataFrame([dataset.table.iloc[0]], columns=dataset.table.columns)
+    dataset.original_table = dataset.table
     for _, transform in transforms.items():
-        tmp = transform.transform(tmp)
-    transformed_columns = tmp.columns.to_list()
+        dataset.table = transform.transform(dataset.table)
+    transformed_columns = dataset.table.columns.to_list()
 
     path = ROOT_PATH / "transforms_data" / "ctgan"
     path.mkdir(exist_ok=True, parents=True)

@@ -1,9 +1,9 @@
 defaults:
   - model: gan
   - metrics: gan
-  - datasets: diabetes # placeholder
+  - datasets: adult
   - dataloader: default # placeholder
-  - transforms: gan # placeholder
+  - transforms: gan
   - _self_
 inferencer_class:
   _target_: src.trainer.GANInferencer
@@ -12,6 +12,6 @@ inferencer:
   device: auto # device name or "auto"
   save_path: "gan" # any name here, can be a dataset name
   seed: 1
-  from_pretrained: "saved/vanilla_gan/checkpoint-epoch1500.pth" # path to the pretrained model
-  number_of_samples: 768
+  from_pretrained: "saved/vanilla_gan/checkpoint-epoch300.pth" # path to the pretrained model
+  number_of_samples: 32561
   # type: 0

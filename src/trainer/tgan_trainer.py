@@ -89,10 +89,8 @@ class TGANTrainer(GANTrainer):
         batch["fake_c_logits"] = fake_c_logits["c_logits"]
 
         fake_features = d_output["features"]
-        batch["real_mean"] = torch.mean(real_features, dim=0)
-        batch["real_sd"] = torch.std(real_features, dim=0)
-        batch["fake_mean"] = torch.mean(fake_features, dim=0)
-        batch["fake_sd"] = torch.std(fake_features, dim=0)
+        batch["real_features"] = real_features
+        batch["fake_features"] = fake_features
 
         loss = self.criterion.generator(**batch)
         batch.update(loss)

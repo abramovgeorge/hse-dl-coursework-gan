@@ -54,10 +54,7 @@ class CTGANTransform(nn.Module):
         Returns:
             x (Tensor): transformed tensor.
         """
-        tmp = pd.DataFrame(x.cpu().numpy(), columns=self._columns)
-        for _, transform in self._transforms.items():
-            tmp = transform.transform(tmp)
-        return torch.Tensor(tmp.to_numpy()).to(x.device)
+        return x
 
     def inverse(self, x):
         """
