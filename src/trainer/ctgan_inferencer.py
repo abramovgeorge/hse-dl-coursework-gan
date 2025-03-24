@@ -24,25 +24,21 @@ class CTGANInferencer(GANInferencer):
         Returns:
             stub (dict): empty dict for inference.py consistency
         """
-        size = self.cfg_trainer.get("number_of_samples", 1)
-        s_type = self.cfg_trainer.get("type", "mixed")
-        type_vec = torch.randint(2, (size,)).to(self.device)
-        if s_type != "mixed":
-            type_vec = torch.full((size,), s_type).to(self.device)
-        noise = torch.randn(size, self.model.noise_dim).to(self.device)
-        conds = []
-        for type_value in type_vec:
+        target = self.cfg_trainer.get("target")
+        conds = torch.zeros(0)
+        for t, num in target.items():
             cond = self.evaluation_dataloaders["train"].get_cond_vector(
-                self.cfg_trainer.get("target_class"), type_value
+                self.cfg_trainer.get("target_class"), t
             )
-            conds.append(cond)
-        conds = torch.stack(conds).to(self.device)
+            conds = torch.cat((conds, cond.reshape(1, -1).repeat(num, 1)))
+        conds = conds.to(self.device)
+        noise = torch.randn(conds.shape[0], self.model.noise_dim).to(self.device)
         batch = {"noise": noise, "cond": conds}
         fake_data = self.model.generator(**batch)["fake_data"]
 
         fake_data = self.batch_transforms["inference"]["data_object"].inverse(fake_data)
 
         output = pd.DataFrame(fake_data.cpu().detach().numpy())
-        output.to_csv(self.save_path / f"{str(s_type)}.csv", index=False)
+        output.to_csv(self.save_path / "output.csv", index=False)
 
         return dict()

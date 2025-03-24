@@ -40,8 +40,8 @@ class TGANLoss(GANLoss):
         """
         return {
             "classification_loss": self.criterion(
-                fake_c_logits.reshape(-1),
-                torch.clip(generated_labels.type(torch.float), min=0, max=1),
+                torch.clip(fake_c_logits.reshape(-1), min=1e-5, max=1 - 1e-5),
+                torch.clip(generated_labels.type(torch.float), min=1e-5, max=1 - 1e-5),
             )
         }
 
@@ -59,6 +59,9 @@ class TGANLoss(GANLoss):
         fake_mean = torch.mean(fake_features, dim=0)
         fake_sd = torch.std(fake_features, dim=0)
         return {
-            "information_loss": torch.norm(real_mean - fake_mean, p=2)
-            + torch.norm(real_sd - fake_sd, p=2)
+            "information_loss": (
+                torch.norm(real_mean - fake_mean, p=2)
+                + torch.norm(real_sd - fake_sd, p=2)
+            )
+            * 0.1
         }

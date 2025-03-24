@@ -89,12 +89,12 @@ class GANInferencer(BaseTrainer):
         Returns:
             stub (dict): empty dict for inference.py consistency
         """
-        size = self.cfg_trainer.get("number_of_samples", 1)
-        s_type = self.cfg_trainer.get("type", "mixed")
-        type_vec = torch.randint(self.model.n_class, (size,)).to(self.device)
-        if s_type != "mixed":
-            type_vec = torch.full((size,), s_type).to(self.device)
-        noise = torch.randn(size, self.model.noise_dim).to(self.device)
+        target = self.cfg_trainer.get("target")
+        type_vec = torch.zeros(0)
+        for t, num in target.items():
+            type_vec = torch.cat((type_vec, torch.full((num,), t)))
+        type_vec = type_vec.type(torch.long).to(self.device)
+        noise = torch.randn(type_vec.shape[0], self.model.noise_dim).to(self.device)
         cond = F.one_hot(type_vec, num_classes=self.model.n_class)
         batch = {"noise": noise, "cond": cond}
         fake_data = self.model.generator(**batch)["fake_data"]
@@ -102,6 +102,6 @@ class GANInferencer(BaseTrainer):
         fake_data = self.batch_transforms["inference"]["data_object"].inverse(fake_data)
 
         output = pd.DataFrame(fake_data.cpu().detach().numpy())
-        output.to_csv(self.save_path / f"{str(s_type)}.csv", index=False)
+        output.to_csv(self.save_path / "output.csv", index=False)
 
         return dict()

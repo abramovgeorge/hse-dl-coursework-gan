@@ -13,5 +13,6 @@ inferencer:
   save_path: "tgan" # any name here, can be a dataset name
   seed: 1
   from_pretrained: "saved/tgan/model_best.pth" # path to the pretrained model
-  number_of_samples: 32561
-  # type: 0
+  target:
+    0: 24720
+    1: 7841

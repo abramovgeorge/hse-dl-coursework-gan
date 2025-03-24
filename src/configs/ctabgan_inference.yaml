@@ -12,7 +12,8 @@ inferencer:
   device: auto # device name or "auto"
   save_path: "ctabgan" # any name here, can be a dataset name
   seed: 1
-  from_pretrained: "saved/ctabgan/checkpoint-epoch300.pth" # path to the pretrained model
-  number_of_samples: 32561
+  from_pretrained: "saved/ctabgan/checkpoint-epoch250.pth" # path to the pretrained model
   target_class: "income"
-  # type: 1
+  target:
+    0: 24720
+    1: 7841

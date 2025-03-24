@@ -1,4 +1,4 @@
 _target_: src.model.CTGAN
 fc_hidden: 256
 noise_dim: 256
-pac: 2
+pac: 10
