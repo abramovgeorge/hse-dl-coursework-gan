@@ -41,54 +41,86 @@ def setup_ctgan(dataset, config, max_clusters):
         max_clusters (int): max clusters for gaussian mixture transform.
     """
 
-    columns = dataset.table.columns.to_list()
-    transforms = dict()
-    transforms_info = dict()
-    cond_len = 0
-    idx = 0
-    for column_name in dataset.table.columns:
-        if column_name in dataset.discrete_columns:
-            transform = OneHotEncoder()
-            transform.fit(dataset.table, column=column_name)
-            cond_len += len(transform.dummies)
-            transforms_info[column_name] = dict()
-            transforms_info[column_name]["rle"] = [idx, len(transform.dummies)]
-            transforms_info[column_name]["map"] = dict(
-                (str(transform.dummies[i]), i) for i in range(len(transform.dummies))
-            )
-            idx += transforms_info[column_name]["rle"][1]
-        else:
-            transform = ContinuousTransform(max_clusters=max_clusters)
-            transform.fit(dataset.table, column=column_name)
-            transforms_info[column_name] = dict()
-            transforms_info[f"{column_name}.component"] = dict()
-            transforms_info[column_name]["rle"] = [
-                idx,
-                1,
-            ]  # normalized value from gm, continuous
-            transforms_info[f"{column_name}.component"]["rle"] = [
-                idx + 1,
-                len(transform.dummies),
-            ]  # onehot
-            transforms_info[f"{column_name}.component"]["map"] = dict(
-                (str(transform.dummies[i]), i) for i in range(len(transform.dummies))
-            )
-            idx += transforms_info[f"{column_name}.component"]["rle"][1] + 1
-        transforms[column_name] = transform
+    dataset_name = config.datasets["train"]["path"].split("/")[-1][:-4]
 
-    dataset.original_table = dataset.table
-    for _, transform in transforms.items():
-        dataset.table = transform.transform(dataset.table)
-    transformed_columns = dataset.table.columns.to_list()
+    path = ROOT_PATH / "transforms_data" / "ctgan" / dataset_name
 
-    path = ROOT_PATH / "transforms_data" / "ctgan"
-    path.mkdir(exist_ok=True, parents=True)
+    if not path.exists():
+        path.mkdir(exist_ok=True, parents=True)
 
-    with open(path / "columns", "wb") as f:
+        columns = dataset.table.columns.to_list()
+        transforms = dict()
+        transforms_info = dict()
+        cond_len = 0
+        idx = 0
+        for column_name in dataset.table.columns:
+            if column_name in dataset.discrete_columns:
+                transform = OneHotEncoder()
+                transform.fit(dataset.table, column=column_name)
+                cond_len += len(transform.dummies)
+                transforms_info[column_name] = dict()
+                transforms_info[column_name]["rle"] = [idx, len(transform.dummies)]
+                transforms_info[column_name]["map"] = dict(
+                    (str(transform.dummies[i]), i)
+                    for i in range(len(transform.dummies))
+                )
+                idx += transforms_info[column_name]["rle"][1]
+            else:
+                transform = ContinuousTransform(max_clusters=max_clusters)
+                transform.fit(dataset.table, column=column_name)
+                transforms_info[column_name] = dict()
+                transforms_info[f"{column_name}.component"] = dict()
+                transforms_info[column_name]["rle"] = [
+                    idx,
+                    1,
+                ]  # normalized value from gm, continuous
+                transforms_info[f"{column_name}.component"]["rle"] = [
+                    idx + 1,
+                    len(transform.dummies),
+                ]  # onehot
+                transforms_info[f"{column_name}.component"]["map"] = dict(
+                    (str(transform.dummies[i]), i)
+                    for i in range(len(transform.dummies))
+                )
+                idx += transforms_info[f"{column_name}.component"]["rle"][1] + 1
+            transforms[column_name] = transform
+
+        dataset.original_table = dataset.table
+        for _, transform in transforms.items():
+            dataset.table = transform.transform(dataset.table)
+        transformed_columns = dataset.table.columns.to_list()
+
+        with open(path / "columns", "wb") as f:
+            pickle.dump(columns, f)
+        with open(path / "transformed_columns", "wb") as f:
+            pickle.dump(transformed_columns, f)
+        with open(path / "transforms", "wb") as f:
+            pickle.dump(transforms, f)
+        with open(path / "cond_len", "wb") as f:
+            pickle.dump(cond_len, f)
+        with open(path / "transforms_info", "wb") as f:
+            pickle.dump(transforms_info, f)
+        dataset.original_table.to_csv(path / "original_table", index=False)
+        dataset.table.to_csv(path / "table", index=False)
+    else:
+        with open(path / "columns", "rb") as f:
+            columns = pickle.load(f)
+        with open(path / "transformed_columns", "rb") as f:
+            transformed_columns = pickle.load(f)
+        with open(path / "transforms", "rb") as f:
+            transforms = pickle.load(f)
+        with open(path / "cond_len", "rb") as f:
+            cond_len = pickle.load(f)
+        with open(path / "transforms_info", "rb") as f:
+            transforms_info = pickle.load(f)
+        dataset.original_table = pd.read_csv(path / "original_table")
+        dataset.table = pd.read_csv(path / "table")
+
+    with open(path.parent / "columns", "wb") as f:
         pickle.dump(columns, f)
-    with open(path / "transformed_columns", "wb") as f:
+    with open(path.parent / "transformed_columns", "wb") as f:
         pickle.dump(transformed_columns, f)
-    with open(path / "transforms", "wb") as f:
+    with open(path.parent / "transforms", "wb") as f:
         pickle.dump(transforms, f)
 
     # set parameters for other modules

@@ -2,7 +2,7 @@ defaults:
   - model: tgan
   - writer: wandb_tgan
   - metrics: tgan
-  - datasets: adult
+  - datasets: credit
   - dataloader: default
   - transforms: gan
   - _self_
@@ -33,13 +33,13 @@ trainer_class:
 trainer:
   log_step: 50
   n_epochs: 300
-  epoch_len: null
+  epoch_len: 65
   n_d_steps: 1
   device_tensors: ["data_object", "labels"] # which tensors should be on device (ex. GPU)
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
   device: auto # device name or "auto"
   override: True # if True, will override the previous run with the same name
-  monitor: "max F1" # "off" or "max/min metric_name", i.e. our goal is to maximize/minimize metric
+  monitor: "off" # "off" or "max/min metric_name", i.e. our goal is to maximize/minimize metric
   save_period: 50 # checkpoint each save_period epochs in addition to the best epoch
   early_stop: ${trainer.n_epochs} # epochs for early stopping
   save_dir: "saved"

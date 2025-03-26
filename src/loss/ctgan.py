@@ -10,12 +10,13 @@ class CTGANLoss(GANLoss):
     CTGANLoss loss functions.
     """
 
-    def __init__(self, transforms_info, discrete_columns):
+    def __init__(self, transforms_info, discrete_columns, **kwargs):
         """
         transforms_info (dict[dict]): info about transformed columns
         discrete_columns (list[str]): names of discrete_columns in original dataset
+        kwargs (dict): other arguments for cooperative inheritance with other losses
         """
-        super().__init__()
+        super().__init__(**kwargs)
         self._cond_criterion = nn.CrossEntropyLoss(reduction="none")
         self._transforms_info = transforms_info
         self._discrete_columns = discrete_columns

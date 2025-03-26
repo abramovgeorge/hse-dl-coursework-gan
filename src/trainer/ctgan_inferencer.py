@@ -25,20 +25,31 @@ class CTGANInferencer(GANInferencer):
             stub (dict): empty dict for inference.py consistency
         """
         target = self.cfg_trainer.get("target")
-        conds = torch.zeros(0)
+        conds = list()
+        # max noise batch size for memory reasons
+        max_size = self.cfg_trainer.get("gen_batch_size", 50000)
         for t, num in target.items():
-            cond = self.evaluation_dataloaders["train"].get_cond_vector(
-                self.cfg_trainer.get("target_class"), t
+            while num > 0:
+                size = min(max_size, num)
+                cond = self.evaluation_dataloaders["train"].get_cond_vector(
+                    self.cfg_trainer.get("target_class"), t
+                )
+                conds.append(cond.reshape(1, -1).repeat(size, 1))
+                num -= size
+        dataframes = list()
+        for cond in conds:
+            cond = cond.to(self.device)
+            noise = torch.randn(cond.shape[0], self.model.noise_dim).to(self.device)
+            batch = {"noise": noise, "cond": cond}
+            fake_data = self.model.generator(**batch)["fake_data"]
+
+            fake_data = self.batch_transforms["inference"]["data_object"].inverse(
+                fake_data
             )
-            conds = torch.cat((conds, cond.reshape(1, -1).repeat(num, 1)))
-        conds = conds.to(self.device)
-        noise = torch.randn(conds.shape[0], self.model.noise_dim).to(self.device)
-        batch = {"noise": noise, "cond": conds}
-        fake_data = self.model.generator(**batch)["fake_data"]
 
-        fake_data = self.batch_transforms["inference"]["data_object"].inverse(fake_data)
+            dataframes.append(pd.DataFrame(fake_data.cpu().detach().numpy()))
 
-        output = pd.DataFrame(fake_data.cpu().detach().numpy())
+        output = pd.concat(dataframes)
         output.to_csv(self.save_path / "output.csv", index=False)
 
         return dict()

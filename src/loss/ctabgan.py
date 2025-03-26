@@ -11,12 +11,15 @@ class CTABGANLoss(CTGANLoss, TGANLoss):
     CTABGANLoss loss functions.
     """
 
-    def __init__(self, transforms_info, discrete_columns):
+    def __init__(self, transforms_info, discrete_columns, w_info=0.1):
         """
-        transforms_info (dict[dict]): info about transformed columns
-        discrete_columns (list[str]): names of discrete_columns in original dataset
+        Args:
+            transforms_info (dict[dict]): info about transformed columns
+            discrete_columns (list[str]): names of discrete_columns in original dataset
+            w_info (float): weight of the information loss
         """
-        super().__init__(transforms_info, discrete_columns)
-        self._cond_criterion = nn.CrossEntropyLoss(reduction="none")
-        self._transforms_info = transforms_info
-        self._discrete_columns = discrete_columns
+        super().__init__(
+            transforms_info=transforms_info,
+            discrete_columns=discrete_columns,
+            w_info=w_info,
+        )

@@ -90,18 +90,29 @@ class GANInferencer(BaseTrainer):
             stub (dict): empty dict for inference.py consistency
         """
         target = self.cfg_trainer.get("target")
-        type_vec = torch.zeros(0)
+        # max noise batch size for memory reasons
+        max_size = self.cfg_trainer.get("gen_batch_size", 50000)
+        type_vecs = list()
         for t, num in target.items():
-            type_vec = torch.cat((type_vec, torch.full((num,), t)))
-        type_vec = type_vec.type(torch.long).to(self.device)
-        noise = torch.randn(type_vec.shape[0], self.model.noise_dim).to(self.device)
-        cond = F.one_hot(type_vec, num_classes=self.model.n_class)
-        batch = {"noise": noise, "cond": cond}
-        fake_data = self.model.generator(**batch)["fake_data"]
+            while num > 0:
+                size = min(num, max_size)
+                type_vecs.append(torch.full((size,), t))
+                num -= size
+        dataframes = list()
+        for type_vec in type_vecs:
+            type_vec = type_vec.type(torch.long).to(self.device)
+            noise = torch.randn(type_vec.shape[0], self.model.noise_dim).to(self.device)
+            cond = F.one_hot(type_vec, num_classes=self.model.n_class)
+            batch = {"noise": noise, "cond": cond}
+            fake_data = self.model.generator(**batch)["fake_data"]
 
-        fake_data = self.batch_transforms["inference"]["data_object"].inverse(fake_data)
+            fake_data = self.batch_transforms["inference"]["data_object"].inverse(
+                fake_data
+            )
 
-        output = pd.DataFrame(fake_data.cpu().detach().numpy())
+            dataframes.append(pd.DataFrame(fake_data.cpu().detach().numpy()))
+
+        output = pd.concat(dataframes)
         output.to_csv(self.save_path / "output.csv", index=False)
 
         return dict()

@@ -1,0 +1,5 @@
+train:
+  _target_: src.datasets.TableDataset
+  path: data/csvs/credit_train.csv
+  instance_transforms: ${transforms.instance_transforms.train}
+  discrete_columns: ["Class"]

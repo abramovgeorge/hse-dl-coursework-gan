@@ -9,8 +9,14 @@ class TGANLoss(GANLoss):
     TGAN loss functions
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, w_info=0.1, **kwargs):
+        """
+        Args:
+            w_info (float): weight of the information loss
+            kwargs (dict): other arguments for cooperative inheritance with other losses
+        """
+        super().__init__(**kwargs)
+        self.w_info_ = w_info
 
     def classifier(self, c_logits: torch.Tensor, labels: torch.Tensor, **batch):
         """
@@ -63,5 +69,5 @@ class TGANLoss(GANLoss):
                 torch.norm(real_mean - fake_mean, p=2)
                 + torch.norm(real_sd - fake_sd, p=2)
             )
-            * 0.1
+            * self.w_info_
         }

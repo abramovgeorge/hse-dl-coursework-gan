@@ -1,7 +1,7 @@
 defaults:
   - model: ctabgan
   - metrics: gan
-  - datasets: adult
+  - datasets: credit
   - dataloader: ctgan
   - transforms: ctgan
   - _self_
@@ -12,8 +12,8 @@ inferencer:
   device: auto # device name or "auto"
   save_path: "ctabgan" # any name here, can be a dataset name
   seed: 1
-  from_pretrained: "saved/ctabgan/checkpoint-epoch250.pth" # path to the pretrained model
-  target_class: "income"
+  from_pretrained: "saved/ctabgan/checkpoint-epoch300.pth" # path to the pretrained model
+  target_class: "Class"
   target:
-    0: 24720
-    1: 7841
+    0: 227440
+    1: 405

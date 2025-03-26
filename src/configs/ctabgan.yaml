@@ -2,7 +2,7 @@ defaults:
   - model: ctabgan
   - writer: wandb_ctabgan
   - metrics: tgan
-  - datasets: adult
+  - datasets: credit
   - dataloader: ctgan
   - transforms: ctgan
   - _self_
@@ -28,6 +28,7 @@ lr_schedulers:
     factor: 1
 loss_function:
   _target_: src.loss.CTABGANLoss
+  w_info: 0.05
 trainer_class:
   _target_: src.trainer.CTABGANTrainer
 trainer:
@@ -39,7 +40,7 @@ trainer:
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
   device: auto # device name or "auto"
   override: True # if True, will override the previous run with the same name
-  monitor: "max F1" # "off" or "max/min metric_name", i.e. our goal is to maximize/minimize metric
+  monitor: "off" # "off" or "max/min metric_name", i.e. our goal is to maximize/minimize metric
   save_period: 25 # checkpoint each save_period epochs in addition to the best epoch
   early_stop: ${trainer.n_epochs} # epochs for early stopping
   save_dir: "saved"

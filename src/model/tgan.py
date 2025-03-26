@@ -1,4 +1,4 @@
-from itertools import count
+from itertools import chain, count
 
 import torch
 from torch import nn
@@ -10,13 +10,14 @@ class TGAN(nn.Module):
     Table-GAN model
     """
 
-    def __init__(self, n_feats, n_class, noise_dim, n_channels=64):
+    def __init__(self, n_feats, n_class, noise_dim, n_channels=64, max_conv_len=4):
         """
         Args:
             n_feats (int): number of features
             n_class (int): number of classes
             noise_dim (int): dimensionality of noise vector
             n_channels (int): number of starting channels
+            max_conv_len (int): maximum number of convolutional layers
         """
         super().__init__()
 
@@ -25,17 +26,22 @@ class TGAN(nn.Module):
 
         self._n_feats = n_feats
 
-        # features are reshaped into square matrix (padded with zeros)
         # powers of two are used so that deconvolutions will work correctly
-        for k in count(2):
-            side = 2**k
+        # sides are powers of two, until we run out of convolution layers, then they have the form of 2^k * x
+        # e.g. with max_conv_len = 4, sides = (4, 8, 16, 24, 32, 40, ...)
+        # features are reshaped into square matrix (padded with zeros)
+        sides = chain(
+            (2**i for i in range(2, max_conv_len - 1)),
+            map(lambda x: 2 ** (max_conv_len - 1) * x, count(1)),
+        )
+        for side in sides:
             if side * side >= self._n_feats + self.n_class:
                 self._d_side = side
                 break
 
         d_dims = [(1, self._d_side), (n_channels, self._d_side // 2)]
 
-        while d_dims[-1][1] != 1:
+        while len(d_dims) < max_conv_len and d_dims[-1][1] != 1:
             d_dims.append([d_dims[-1][0] * 2, d_dims[-1][1] // 2])
 
         d_layers = []
@@ -49,15 +55,18 @@ class TGAN(nn.Module):
 
         self.discriminator_net = Sequential(*d_layers)
 
-        for k in count(2):
-            side = 2**k
+        sides = chain(
+            (2**i for i in range(2, max_conv_len - 1)),
+            map(lambda x: 2 ** (max_conv_len - 1) * x, count(1)),
+        )
+        for side in sides:
             if side * side >= self._n_feats:
                 self._g_side = side
                 break
 
         g_dims = [(1, self._g_side), (n_channels, self._g_side // 2)]
 
-        while g_dims[-1][1] != 1:
+        while len(g_dims) < max_conv_len and g_dims[-1][1] != 1:
             g_dims.append([g_dims[-1][0] * 2, g_dims[-1][1] // 2])
 
         # reverse of discriminator layers
@@ -76,16 +85,19 @@ class TGAN(nn.Module):
 
         self.generator_net = Sequential(*g_layers)
 
+        sides = chain(
+            (2**i for i in range(2, max_conv_len - 1)),
+            map(lambda x: 2 ** (max_conv_len - 1) * x, count(1)),
+        )
         # copy of discriminator
-        for k in count(2):
-            side = 2**k
+        for side in sides:
             if side * side >= self._n_feats - 1:
                 self._c_side = side
                 break
 
         c_dims = [(1, self._c_side), (n_channels, self._c_side // 2)]
 
-        while c_dims[-1][1] != 1:
+        while len(c_dims) < max_conv_len and c_dims[-1][1] != 1:
             c_dims.append([c_dims[-1][0] * 2, c_dims[-1][1] // 2])
 
         c_layers = []
