@@ -2,7 +2,7 @@ defaults:
   - model: tgan
   - writer: wandb_tgan
   - metrics: tgan
-  - datasets: credit
+  - datasets: adult
   - dataloader: default
   - transforms: gan
   - _self_

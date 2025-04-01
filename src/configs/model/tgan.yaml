@@ -1,5 +1,6 @@
 _target_: src.model.TGAN
-n_feats: 31
+n_feats: 15
 n_class: 2
 noise_dim: 128
 n_channels: 64
+max_conv_len: 3

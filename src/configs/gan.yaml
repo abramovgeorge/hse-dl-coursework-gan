@@ -2,7 +2,7 @@ defaults:
   - model: gan
   - writer: wandb
   - metrics: gan
-  - datasets: credit
+  - datasets: adult
   - dataloader: default
   - transforms: gan
   - _self_

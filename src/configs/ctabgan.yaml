@@ -28,7 +28,6 @@ lr_schedulers:
     factor: 1
 loss_function:
   _target_: src.loss.CTABGANLoss
-  w_info: 0.05
 trainer_class:
   _target_: src.trainer.CTABGANTrainer
 trainer:

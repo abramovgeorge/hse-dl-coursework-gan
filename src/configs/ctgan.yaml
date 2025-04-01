@@ -2,7 +2,7 @@ defaults:
   - model: ctgan
   - writer: wandb_ctgan
   - metrics: gan
-  - datasets: credit
+  - datasets: adult
   - dataloader: ctgan
   - transforms: ctgan
   - _self_

@@ -1,5 +1,5 @@
 _target_: src.model.GAN
-n_feats: 31
+n_feats: 15
 n_class: 2
 fc_hidden: 256
 noise_dim: 128

@@ -1,7 +1,7 @@
 defaults:
   - model: tgan
   - metrics: gan
-  - datasets: credit
+  - datasets: adult
   - dataloader: default # placeholder
   - transforms: gan
   - _self_
@@ -14,5 +14,5 @@ inferencer:
   seed: 1
   from_pretrained: "saved/tgan/checkpoint-epoch300.pth" # path to the pretrained model
   target:
-    0: 227440
-    1: 405
+    0: 24720
+    1: 7841
