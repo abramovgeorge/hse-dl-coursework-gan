@@ -38,7 +38,13 @@ where `MODEL_NAME` is the name of the model from the previous section.
 
 In the corresponding inference config you can specify number of generated entries for each class, or, in the case of conditional models (CTGAN, CTABGAN), target discrete feature. The results are saved to `data/saved/MODEL_NAME` folder, which also can be specified in the config.
 
-Metrics for the report were calculated using this [script](scripts/metrics.py).
+Metrics for the report were calculated using this [script](scripts/metrics.py), to use it run the following command:
+
+```bash
+pyhton3 scripts/metrics.py TRAIN_PATH TEST_PATH
+```
+
+where `TRAIN_PATH` is the path to the (synthesized) train dataset, and `TEST_PATH` is the path to the test dataset.
 
 ## Credits
 
